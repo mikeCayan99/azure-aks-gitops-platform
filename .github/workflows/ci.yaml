@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  application:
+    name: Application and image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build container
+        run: docker build --pull --tag demo-app:ci .
+      - name: Test HTTP endpoints in restricted container
+        run: |
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/tests,target=/tests,readonly" \
+            --entrypoint python demo-app:ci -m unittest discover -s /tests -v
+      - name: Export image for scanning
+        run: docker save --output "$RUNNER_TEMP/demo-app.tar" demo-app:ci
+      - name: Scan image for high and critical vulnerabilities
+        run: |
+          docker run --rm \
+            --mount "type=bind,source=$RUNNER_TEMP/demo-app.tar,target=/image.tar,readonly" \
+            aquasec/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa \
+            image --input /image.tar --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --timeout 10m
+
+  helm:
+    name: Helm chart
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download and verify Helm 4.3.0
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl --fail --silent --show-error --location --output helm.tar.gz https://get.helm.sh/helm-v4.3.0-linux-amd64.tar.gz
+          echo '86584a54def73570558f66f5111cc53dfed56689637ae32c1201205d494f54fb  helm.tar.gz' | sha256sum --check
+          tar -xzf helm.tar.gz linux-amd64/helm
+          echo "$RUNNER_TEMP/linux-amd64" >> "$GITHUB_PATH"
+      - name: Lint defaults and local values
+        run: |
+          helm lint charts/demo-app --strict
+          helm lint charts/demo-app --strict -f environments/local/values.yaml
+      - name: Render defaults and local values
+        run: |
+          helm template demo-app charts/demo-app --namespace demo-app > "$RUNNER_TEMP/default.yaml"
+          helm template demo-app charts/demo-app --namespace demo-app -f environments/local/values.yaml > "$RUNNER_TEMP/local.yaml"
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan Git history
+        run: |
+          docker run --rm --network none \
+            --env GIT_CONFIG_COUNT=1 --env GIT_CONFIG_KEY_0=safe.directory --env GIT_CONFIG_VALUE_0=/repo \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/repo,readonly" \
+            ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git /repo --log-opts=--all --redact --exit-code 1
+      - name: Scan working files
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/repo,readonly" \
+            ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            dir /repo --redact --exit-code 1
