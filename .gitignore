@@ -53,8 +53,3 @@ __pycache__/
 .venv/
 venv/
 node_modules/
-
-# Generated remote-backend configuration and encrypted-plan staging metadata
-infrastructure/azure/backend.generated.tf
-infrastructure/azure/plan.sha256
-infrastructure/azure/revision.txt
