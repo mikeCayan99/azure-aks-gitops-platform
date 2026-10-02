@@ -1,0 +1,55 @@
+# Terraform working data and sensitive outputs
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.plan
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.json.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Local credentials and environment configuration
+.env
+.env.*
+!.env.example
+.azure/
+.kube/
+kubeconfig
+kubeconfig.*
+*.kubeconfig
+secrets/
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Local editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files and local reports
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+coverage/
+htmlcov/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
