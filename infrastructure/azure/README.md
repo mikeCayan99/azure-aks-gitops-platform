@@ -4,7 +4,7 @@ This root configuration defines a dedicated resource group, an AKS Free-tier clu
 
 ## Validation status
 
-Terraform 1.15.6 on Windows validated the configuration with AzureRM 5.8.0. Formatting and provider-schema validation passed; the provider lockfile covers Windows and Linux amd64. No Azure-authenticated plan, apply, connectivity check, image publishing, or AKS application deployment has been performed. The local kind environment remains separate. The CI workflow includes a Terraform formatting, backend-free initialization, and validation job without Azure authentication; its first GitHub run is pending.
+Terraform 1.15.6 on Windows validated the configuration with AzureRM 5.8.0. Formatting and provider-schema validation passed; the provider lockfile covers Windows and Linux amd64. No Azure-authenticated plan, apply, connectivity check, image publishing, or AKS application deployment has been performed. The local kind environment remains separate. The CI workflow includes a Terraform formatting, backend-free initialization, and validation job without Azure authentication; the Terraform CI job has passed on GitHub.
 
 ## Design and boundaries
 
@@ -14,7 +14,7 @@ Terraform 1.15.6 on Windows validated the configuration with AzureRM 5.8.0. Form
 - Entra authentication and Azure Kubernetes RBAC; local admin accounts disabled. The named operator receives cluster-user credential access and Kubernetes cluster-admin authorization on this cluster only. kubelogin is needed for Entra-based kubectl access. These permissions are intentionally broad inside this temporary cluster for bootstrap; workload-specific delegation is not implemented.
 - Public Kubernetes API restricted to explicit operator IPv4 /32 CIDRs. The Basic registry has a public authenticated endpoint; private registry networking is not implemented.
 - Azure CNI overlay with Cilium. This selects a policy-capable data plane; application NetworkPolicies must still be written and tested. No network-isolation claim is made.
-- OIDC and workload identity enabled. No application identity, federated GitHub credential, or CI publishing permission is provisioned yet.
+- AKS OIDC issuer and workload identity are enabled for potential in-cluster workloads. This is independent of GitHub authentication: no GitHub federated credential or publishing identity is provisioned. Terraform is executed locally with the operator's Azure CLI identity; see the [execution workflow](../../docs/azure-workflow.md).
 - Provider auto-registration disabled. Confirm Microsoft.ContainerService, Microsoft.ContainerRegistry, Microsoft.Compute, Microsoft.Network, and Microsoft.ManagedIdentity are registered before planning. Registration is a separate subscription operation.
 - Local state is used for this single-operator session. State and plans can contain sensitive data and must remain outside Git. Keep state until destroy completes. No kubeconfig is exported through Terraform outputs.
 
