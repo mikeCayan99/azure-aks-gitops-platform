@@ -25,7 +25,7 @@ From the repository root in PowerShell:
 
 ```powershell
 kubectl --context kind-aks-gitops apply -f gitops/local/namespace.yaml
-kubectl --context kind-aks-gitops apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.3/manifests/install.yaml
+kubectl --context kind-aks-gitops apply --server-side -n argocd -k gitops/local/install
 kubectl --context kind-aks-gitops -n argocd wait --for=condition=Available deployment --all --timeout=120s
 kubectl --context kind-aks-gitops -n argocd rollout status statefulset/argocd-application-controller --timeout=120s
 kubectl --context kind-aks-gitops apply -f environments/local/namespace.yaml
@@ -34,7 +34,9 @@ kubectl --context kind-aks-gitops -n argocd patch configmap argocd-cm --type mer
 kubectl --context kind-aks-gitops apply -f gitops/local/project.yaml -f gitops/local/application.yaml
 ```
 
-The bootstrap files are applied explicitly with kubectl; Argo CD does not manage its own installation or Application definition in this setup. No vendored upstream installation manifest is committed.
+The bootstrap files are applied explicitly with kubectl; Argo CD does not manage its own installation or Application definition in this setup. The installation Kustomization references the official v3.5.3 manifest at a fixed commit and removes the unused ApplicationSet controller, Service, ServiceAccount, Role, RoleBinding, ClusterRole, and ClusterRoleBinding before installation. ApplicationSet CRDs remain, but no ApplicationSet controller runs. No vendored upstream installation manifest is committed.
+
+To inspect the prepared installation without contacting a Kubernetes cluster, run `kubectl kustomize gitops/local/install`. This downloads the pinned public manifest and renders it locally; it does not install anything. The filtered installation has been checked by rendering only, separately from the earlier runtime validation recorded below.
 
 The Application reads `charts/demo-app` from the public repository's `main` branch and uses `environments/local/values.yaml`. No Git credentials are required. Local uncommitted chart changes are not read by Argo CD. Keep the Application name and Helm rendering release name `demo-app` aligned with the chart's instance labels.
 
