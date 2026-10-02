@@ -41,13 +41,13 @@ The existing `demo-app` namespace must already exist. Server dry-run validates r
 
 ## Existing local deployment
 
-The manifests in `environments/local/deployment.yaml` and `service.yaml` preserve the initial kubectl deployment step. The local application has since been replaced by the Helm release `demo-app`. Do not apply the old manifests over the Helm-managed resources.
+The manifests in `environments/local/deployment.yaml` and `service.yaml` preserve the initial kubectl deployment step. A Helm release was used to validate this chart locally, then removed during the transition to [Argo CD](../../gitops/local/README.md). The local application is now managed by Argo CD. Do not install or upgrade a Helm release against those same resources, or apply the old kubectl manifests over them.
 
 A Helm installation requires an explicit transition: remove the old application Deployment and Service, keep the namespace, and install the chart as a Helm release. This causes a brief interruption with a single replica. The chart changes the Deployment selector to include the release instance; that selector cannot be changed in place. Adoption of the existing resources is not used.
 
 Local validation covered chart linting, rendering, server-side dry runs, Helm installation, pod readiness, all three endpoints through the internal service, non-root execution, and absence of a mounted API token. Helm upgrade and rollback remain unverified. No load testing or failure scenarios are included.
 
-## Install into an empty application namespace
+## Standalone Helm installation into an empty application namespace
 
 After creating the namespace with `environments/local/namespace.yaml` and loading the image into kind, install only if no conflicting application Deployment or Service exists:
 
@@ -57,7 +57,7 @@ helm install demo-app charts/demo-app --kube-context kind-aks-gitops --namespace
 
 These flags use Helm 4.3.0. `--wait` waits for readiness; `--rollback-on-failure` removes the failed installation. This does not restore resources that were removed before installation.
 
-## Inspect the release
+## Inspect a standalone Helm release
 
 ```powershell
 helm status demo-app --kube-context kind-aks-gitops -n demo-app

@@ -1,6 +1,6 @@
 # Initial local Kubernetes deployment
 
-The application is now managed by the Helm release described in [the chart documentation](../../charts/demo-app/README.md). The deployment commands below document the earlier kubectl step. Do not apply these Deployment and Service manifests over the Helm release. The namespace manifest remains shared setup.
+The application is now managed by [Argo CD](../../gitops/local/README.md), which renders [the Helm chart](../../charts/demo-app/README.md). The deployment commands below document the earlier kubectl step. Do not apply these Deployment and Service manifests over the Argo CD-managed resources. The namespace manifest remains shared setup.
 
 These manifests run one demo application replica in the existing `aks-gitops` kind cluster. They are applied directly with kubectl before introducing Helm or Argo CD. Do not manage these same resources with multiple deployment tools at once.
 

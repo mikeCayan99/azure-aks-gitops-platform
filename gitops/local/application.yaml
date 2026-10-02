@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app
+  namespace: argocd
+spec:
+  project: demo-app
+  source:
+    repoURL: https://github.com/mikeCayan99/azure-aks-gitops-platform.git
+    targetRevision: main
+    path: charts/demo-app
+    helm:
+      releaseName: demo-app
+      valueFiles:
+        - ../../environments/local/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo-app
