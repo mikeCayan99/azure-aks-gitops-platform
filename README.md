@@ -4,7 +4,7 @@ Reproducible Azure Kubernetes infrastructure and GitOps application delivery wit
 
 ## Status
 
-Implemented and locally validated: a containerized FastAPI application, Kubernetes Deployment and Service manifests, and a Helm chart deployed in kind with health probes and restricted container settings. Argo CD was installed locally and a manual synchronization completed with `Synced` and `Healthy`; see [the local GitOps setup](gitops/local/README.md). See [the Helm chart documentation](charts/demo-app/README.md) for commands and validation limits. Azure infrastructure, CI, image publishing, and automated synchronization remain planned.
+Implemented and locally validated: a containerized FastAPI application, Kubernetes Deployment and Service manifests, and a Helm chart deployed in kind with health probes and restricted container settings. Argo CD was installed locally and a manual synchronization completed with `Synced` and `Healthy`; see [the local GitOps setup](gitops/local/README.md). See [the Helm chart documentation](charts/demo-app/README.md) for commands and validation limits. A [CI workflow](docs/ci.md) has been prepared and locally validated; its image scan currently fails on identified vulnerabilities and no GitHub Actions run has been verified yet. Azure infrastructure, image publishing, and automated synchronization remain planned.
 
 ## Planned architecture
 
