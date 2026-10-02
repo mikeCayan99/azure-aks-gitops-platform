@@ -209,7 +209,7 @@ The reusable configuration defaults to `Standard_D4s_v5`. The actual plan used `
 
 The plan provides a concrete preview of the infrastructure and role assignments using the selected Azure identity. Operator access is scoped to the project cluster, and the kubelet's image-pull role is scoped to ACR. The detailed runbook describes permissions and deployment checks.
 
-Terraform inputs, state, kubeconfig, and saved plans remain outside Git. The saved plan was removed after review, and Azure CLI was signed out. The [execution model](docs/azure-workflow.md) and [infrastructure runbook](infrastructure/azure/README.md) document the local workflow.
+Terraform inputs, state, kubeconfig, and saved plans remain outside Git. The saved plan was removed after review, and Azure CLI was signed out. The [Azure workflow and infrastructure runbook](docs/azure-workflow.md) documents planning, permissions, and cleanup.
 
 ## Cost and cleanup decisions
 
@@ -250,7 +250,7 @@ $ciTestsDirectory = Join-Path (Get-Location).Path 'tests'
 docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --mount "type=bind,source=$ciTestsDirectory,target=/tests,readonly" --entrypoint python demo-app:ci -m unittest discover -s /tests -v
 ```
 
-These commands rebuild and test an image locally; they do not deploy Kubernetes or Azure resources. For full reconstruction, follow the [Helm instructions](charts/demo-app/README.md), [Argo CD bootstrap and image procedure](gitops/local/README.md), and [security overlay](docs/local-security.md). Use a new image tag for a new source build rather than reassigning a recorded historical tag.
+These commands rebuild and test an image locally; they do not deploy Kubernetes or Azure resources. For full reconstruction, follow the [local Kubernetes, Helm, and Argo CD setup](docs/local-setup.md) and [security overlay](docs/local-security.md). Use a new image tag for a new source build rather than reassigning a recorded historical tag.
 
 For Terraform validation without Azure deployment:
 
