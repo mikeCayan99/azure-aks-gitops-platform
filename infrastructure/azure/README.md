@@ -4,7 +4,7 @@ This root configuration defines a dedicated resource group, an AKS Free-tier clu
 
 ## Validation status
 
-Terraform 1.15.6 on Windows validated the configuration with AzureRM 5.8.0. Formatting and provider-schema validation passed; the provider lockfile covers Windows and Linux amd64. No Azure-authenticated plan, apply, connectivity check, image publishing, or AKS application deployment has been performed. The local kind environment remains separate.
+Terraform 1.15.6 on Windows validated the configuration with AzureRM 5.8.0. Formatting and provider-schema validation passed; the provider lockfile covers Windows and Linux amd64. No Azure-authenticated plan, apply, connectivity check, image publishing, or AKS application deployment has been performed. The local kind environment remains separate. The CI workflow includes a Terraform formatting, backend-free initialization, and validation job without Azure authentication; its first GitHub run is pending.
 
 ## Design and boundaries
 

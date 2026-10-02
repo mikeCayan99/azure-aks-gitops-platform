@@ -9,6 +9,8 @@ The workflow in `.github/workflows/ci.yaml` runs on pull requests and pushes to 
 - Helm: download Helm 4.3.0, verify its archive against a fixed SHA-256 checksum, lint chart defaults and local values, and render both configurations. These checks do not create a cluster or validate runtime Kubernetes behavior.
 - Secret scan: Gitleaks 8.30.1 scans all fetched Git history and checked-out files. Output is redacted; any finding fails the job. A successful scan is not proof that every possible secret has been excluded.
 
+- Terraform: install pinned Terraform 1.15.6, check formatting, initialize the locked providers with backend disabled, and validate the configuration. This job does not authenticate to Azure, register resource providers, run plan/apply/destroy, or validate subscription quotas and regional availability.
+
 ## Permissions and dependencies
 
 Jobs run on GitHub-hosted Ubuntu 24.04 runners with `contents: read`. Checkout does not persist credentials. There is no `pull_request_target` trigger, registry login, Azure login, or repository secret passed to application code. Full history is fetched only for the secret scan.
