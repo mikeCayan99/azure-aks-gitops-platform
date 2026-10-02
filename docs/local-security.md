@@ -26,6 +26,8 @@ The two upstream ClusterRoles are replaced with narrow rules: get the named `dem
 
 Existing roles in `argocd` remain necessary for managing Applications, AppProjects, configuration, and connection secrets. The server can still request synchronization through Application operations. The default admin account and other upstream components remain; this is not comprehensive Argo CD least-privilege hardening. A controller allowed to edit workloads can influence code running in `demo-app`, so the Pod Security controls and absence of privileged service-account grants still matter.
 
+The installation Kustomization in `gitops/local/install` omits the unused ApplicationSet controller and all seven of its workload, service, identity, and RBAC resources. In particular, its upstream cluster-wide Secret and ConfigMap read permissions are not installed. ApplicationSet CRDs remain for upstream compatibility. This change was validated by rendering the installation without a running cluster; the historical authorization results below do not constitute a runtime test of this filtered installation.
+
 Observed authorization results:
 
 | ServiceAccount | Action | Namespace | Result |
@@ -41,7 +43,7 @@ A subsequent manual sync of the existing merged revision completed with `Succeed
 
 ## Bootstrap and recovery
 
-After installing the pinned upstream Argo CD manifest and provisioning both namespaces, apply:
+After installing Argo CD through `gitops/local/install` as described in the setup guide and provisioning both namespaces, apply:
 
 ```powershell
 kubectl --context kind-aks-gitops apply -f gitops/local/rbac.yaml
@@ -51,6 +53,6 @@ kubectl --context kind-aks-gitops -n argocd rollout restart statefulset/argocd-a
 kubectl --context kind-aks-gitops -n argocd rollout status statefulset/argocd-application-controller --timeout=60s
 ```
 
-Reapplying the upstream installer restores its broad ClusterRole rules; always reapply this overlay afterward. It is maintained separately from the application chart and does not grant Argo CD permission to manage its own RBAC. A temporary local copy of the original non-secret ClusterRoles was saved before testing, for immediate recovery if required; it is not a credential backup or a repository artifact.
+Use the installation Kustomization for future installations and updates; applying the unfiltered upstream manifest would restore the ApplicationSet controller and its broad permissions. Reapplying either installer also restores the application-controller and server ClusterRole rules, so always reapply the RBAC overlay afterward. The overlay is maintained separately from the application chart and does not grant Argo CD permission to manage its own RBAC. Filtering an installer does not delete resources from an older installation: an existing cluster needs an explicitly reviewed removal of the seven ApplicationSet resources. The previously validated kind cluster was removed, so the documented setup targets a fresh installation. A temporary local copy of the original non-secret ClusterRoles was saved before testing, for immediate recovery if required; it is not a credential backup or a repository artifact.
 
 For future in-cluster HTTP checks, use a restricted temporary client pod with `access: demo-app`. Do not test service connectivity from the application pod itself: its egress is intentionally denied. Keep allowed-client selection and namespace scope explicit when adding an ingress controller or another caller.
