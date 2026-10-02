@@ -22,7 +22,7 @@ The version change was commit `7e9c15e`. `git revert --no-commit 7e9c15e` prepar
 4. On a new branch, revert the original version-change commit. Review the inverse change, run CI, and merge the rollback pull request.
 5. Manually sync the rollback revision. Verify the restored version, endpoint responses, and Argo CD health and sync status.
 
-For image changes, the selected image must already be available on every target kind node because local values use `imagePullPolicy: Never`. See [the image update procedure](../gitops/local/README.md#update-the-local-application-image).
+For image changes, the selected image must already be available on every target kind node because local values use `imagePullPolicy: Never`. See [the image update procedure](local-setup.md#update-the-local-application-image).
 
 ## Scope and limits
 
