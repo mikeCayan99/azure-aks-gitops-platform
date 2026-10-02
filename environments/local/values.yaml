@@ -1,3 +1,5 @@
 image:
   tag: "git-e1f3391"
   pullPolicy: Never
+
+appVersion: "0.1.1"
