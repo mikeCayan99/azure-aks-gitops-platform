@@ -2,7 +2,7 @@
 
 ## Current validation status
 
-The application, Helm deployment, Argo CD manual synchronization, version rollout, rollback, and local security controls have been tested in kind. The Azure Terraform configuration has passed formatting and provider-schema validation, including GitHub CI. No Azure-authenticated plan, apply, image publishing, or application deployment on AKS has been performed.
+The application, Helm deployment, Argo CD manual synchronization, version rollout, rollback, and local security controls have been tested in kind. The Azure Terraform configuration has passed formatting and provider-schema validation, including GitHub CI. On 2026-10-02, an Azure-authenticated plan completed successfully with six resources to create, zero changes, and zero deletions. It selected Kubernetes 1.36.3 and two Standard_E4bs_v5 nodes in West Europe, with AKS Run Command disabled. No apply, destroy, image publishing, or application deployment on AKS has been performed.
 
 ## Responsibilities
 
