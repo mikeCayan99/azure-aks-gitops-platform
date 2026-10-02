@@ -1,0 +1,9 @@
+subscription_id          = "REPLACE_SUBSCRIPTION_ID"
+tenant_id                = "REPLACE_TENANT_ID"
+operator_object_id       = "REPLACE_OPERATOR_OBJECT_ID"
+registry_name            = "replacewithuniqueacrname"
+kubernetes_version       = "REPLACE_SUPPORTED_PATCH_VERSION"
+api_authorized_ip_ranges = ["REPLACE_PUBLIC_IPV4/32"]
+cleanup_deadline         = "REPLACE_CLEANUP_TIMESTAMP"
+location                 = "westeurope"
+node_vm_size             = "Standard_D4s_v5"
