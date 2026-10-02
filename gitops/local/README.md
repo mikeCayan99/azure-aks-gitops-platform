@@ -92,10 +92,12 @@ The official installation grants broad Kubernetes cluster permissions to Argo CD
 
 Argo CD 3.5's documented test matrix includes Kubernetes 1.33 through 1.36. This existing kind cluster uses Kubernetes 1.37, so successful local checks do not establish officially tested compatibility. The upstream installation includes NetworkPolicies, but enforcement has not been verified on the default kind network.
 
-No automatic synchronization, Git-revert recovery exercise, drift/self-heal test, or Azure deployment is included in this bootstrap step.
+Automatic synchronization, drift/self-heal testing, and Azure deployment remain unverified. A subsequent manual version update and Git-revert rollback are documented in [the validation evidence](../../docs/gitops-validation.md).
 
 ## Validation evidence
 
 The local bootstrap was checked with Argo CD v3.5.3 on kind Kubernetes v1.37.0. All Argo CD pods became ready. Server-side dry runs accepted the AppProject and Application. The controller successfully read and rendered Git revision `2139fc0401784cb87407fc79ed92cc60923eba4f`, reporting `Healthy` and `OutOfSync` while the original Helm release remained deployed. The UI returned HTTP 200 through a temporary loopback HTTPS port-forward.
 
 A subsequent ownership transition removed the Helm release and requested one manual Argo CD sync to Git revision `2139fc0401784cb87407fc79ed92cc60923eba4f`. The operation completed with `Succeeded`; the Application reported `Synced` and `Healthy`. The replacement pod was `1/1 Ready` with zero restarts. All three endpoints returned expected HTTP 200 responses through service DNS/ClusterIP, non-root execution and absence of the API token were confirmed, and `helm list` showed no application release. Automatic sync, self-heal, and pruning remain disabled.
+
+The subsequent Alpine deployment and version rollback completed successfully; see [the recorded revisions, results, and limits](../../docs/gitops-validation.md).

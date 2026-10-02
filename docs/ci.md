@@ -21,7 +21,7 @@ Timeouts bound job runtime and newer runs cancel older runs for the same ref. CI
 
 The first GitHub Actions run for pull request #5 passed the container build, both HTTP test scenarios, Helm validation, and secret scans. The image scan completed and failed the strict gate with 44 HIGH Debian package findings and zero CRITICAL or Python-package findings.
 
-The subsequent Alpine runtime image passed the same HTTP tests and strict Trivy gate locally: zero HIGH and CRITICAL findings across 29 operating system packages and 14 Python application packages. The revised image has not yet been validated in GitHub Actions or deployed to Kubernetes. Scan results are a dated database snapshot, not a guarantee of vulnerability-free software.
+The subsequent Alpine runtime image passed the same HTTP tests and strict Trivy gate locally: zero HIGH and CRITICAL findings across 29 operating system packages and 14 Python application packages. The revised image subsequently passed all three GitHub Actions jobs and was deployed through Argo CD in the local kind cluster; see [the deployment and rollback evidence](gitops-validation.md). Scan results are a dated database snapshot, not a guarantee of vulnerability-free software.
 
 ## Run the HTTP tests locally
 
@@ -74,4 +74,4 @@ A simulated Debian package removal could not resolve dependencies because apt an
 
 Alpine uses musl rather than Debian's glibc. The current pydantic-core dependency has a compatible musllinux wheel for the tested linux/amd64 architecture; both HTTP scenarios passed with the existing restrictions. The binary-wheel-only build fails if a future dependency lacks a compatible wheel. Other architectures and future native dependencies require separate validation. A multi-stage build by itself does not eliminate vulnerabilities already present in a runtime base.
 
-The strict scanner policy and workflow remain unchanged. The running kind workload still uses its existing image; this change does not deploy it.
+The strict scanner policy and workflow remain unchanged. A subsequent local-values change selected the new image and a manual Argo CD sync deployed it to kind. Image builds and CI jobs themselves do not deploy resources.
