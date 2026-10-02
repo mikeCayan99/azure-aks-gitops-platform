@@ -4,7 +4,7 @@ Reproducible Azure Kubernetes infrastructure and GitOps application delivery wit
 
 ## Status
 
-Repository setup is in progress. The architecture and controls below are planned; they are not yet implemented in this repository.
+Implemented and locally validated: a containerized FastAPI application, Kubernetes Deployment and Service manifests, and a Helm chart installed in kind with health probes and restricted container settings. See [the Helm chart documentation](charts/demo-app/README.md) for commands and validation limits. Azure infrastructure, CI, image publishing, and Argo CD remain planned.
 
 ## Planned architecture
 

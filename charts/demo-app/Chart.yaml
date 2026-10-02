@@ -1,0 +1,6 @@
+apiVersion: v2
+name: demo-app
+description: A small HTTP application with health probes and restricted container settings.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

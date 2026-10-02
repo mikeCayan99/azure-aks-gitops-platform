@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: aks-gitops-demo
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+appVersion: "0.1.0"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi
