@@ -1,39 +1,48 @@
 # Azure AKS GitOps Platform
 
-Reproducible Azure Kubernetes infrastructure and GitOps application delivery with Terraform, Helm, and Argo CD.
+Locally validated GitOps platform with FastAPI, Helm, Argo CD, and automated security checks. Azure AKS infrastructure is defined in Terraform and checked through a successful Azure-authenticated plan.
 
-## Status
+## Delivered capabilities
 
-Implemented and locally validated: a containerized FastAPI application, Kubernetes Deployment and Service manifests, and a Helm chart deployed in kind with health probes and restricted container settings. Argo CD was installed locally and a manual synchronization completed with `Synced` and `Healthy`; see [the local GitOps setup](gitops/local/README.md). See [the Helm chart documentation](charts/demo-app/README.md) for commands and validation limits. The first [CI run](docs/ci.md) passed application, Helm, and secret checks but failed the Debian image scan. The revised Alpine runtime passed GitHub Actions validation, including the strict HIGH/CRITICAL scan, and was deployed locally through Argo CD. A version update and Git-revert rollback were verified; see [the validation evidence](docs/gitops-validation.md). An [Azure Terraform baseline](infrastructure/azure/README.md) is prepared and locally schema-validated; no Azure plan or deployment has been performed. Infrastructure operations are performed locally using the operator's Azure CLI identity; see the [Azure execution workflow](docs/azure-workflow.md). Azure image publishing and deployment remain untested; Argo CD synchronization is manual.
+- Containerized FastAPI application with version, liveness, and readiness endpoints.
+- Kubernetes manifests and a Helm chart with health probes, resource limits, and restricted container settings.
+- Manual Argo CD synchronization with verified version rollout and Git-revert rollback in kind.
+- Tested application network isolation and a namespace-scoped local Argo CD RBAC overlay.
+- Four GitHub Actions jobs covering application/image tests and vulnerability scanning, Helm validation, secret scanning, and Terraform validation.
+- Terraform configuration for AKS, ACR, managed identities, and scoped role assignments; an Azure-authenticated plan completed successfully.
 
 ## Architecture and execution model
 
-- Terraform is executed on the operator's computer to provision and destroy Azure infrastructure and resource permissions.
-- GitHub Actions validates changes and scans container images without Azure access. For Azure integration, the operator builds and uploads the image to Azure Container Registry using their own Azure CLI identity.
-- Helm defines application resources and environment-specific configuration.
-- Reviewed Git changes specify the desired image digest and application configuration.
-- Argo CD runs inside the Kubernetes cluster and applies the desired state from Git after a manual synchronization.
+| Component | Responsibility |
+| --- | --- |
+| Terraform on the operator's computer | Defines and, when explicitly applied, creates or destroys Azure infrastructure. |
+| GitHub | Stores application code, Terraform, Helm configuration, and validation evidence. |
+| GitHub Actions | Validates changes without Azure access or image publishing. |
+| Argo CD in the Kubernetes cluster | Reads the Helm configuration from Git and deploys it after a manual sync. |
+| Application | Runs in the local kind environment used for validation; AKS deployment is prepared separately. |
 
-Local validation uses kind with Docker Desktop. Azure integration uses temporary AKS deployments.
+For a future Azure integration, the operator would upload the image to ACR using their own Azure CLI identity. No GitHub Azure credentials or GitHub OIDC integration are required by the current workflow. See the [Azure execution workflow](docs/azure-workflow.md).
+
+## Validation evidence
+
+Local deployment, synchronization, version change, and rollback are documented in [GitOps validation](docs/gitops-validation.md). The local application image passed the strict HIGH/CRITICAL vulnerability gate and HTTP tests. Scan results describe the database snapshot at test time, not a permanent vulnerability-free guarantee. See [CI checks and image investigation](docs/ci.md) and [local security validation](docs/local-security.md).
+
+On 2026-10-02, Terraform produced a successful Azure-authenticated plan in West Europe: six resources to create, zero changes, and zero deletions. The plan included Kubernetes 1.36.3, two Standard_E4bs_v5 system nodes, ACR Basic, and scoped operator and image-pull role assignments. AKS Run Command was explicitly disabled. The plan and local input file are excluded from Git.
+
+Validation boundaries: application deployment and runtime security were tested in kind. Azure apply/destroy, image publishing to ACR, and application deployment on AKS have not been performed. Successful planning does not prove Azure capacity, creation permissions, or runtime integration.
+
+## Reproduce and review
+
+Use the [local GitOps setup](gitops/local/README.md), [Helm chart instructions](charts/demo-app/README.md), and [Terraform runbook](infrastructure/azure/README.md) to reconstruct the environment. Choose current supported versions and review permissions and costs before any Azure deployment. Changes use feature branches, pull requests, and the four CI checks before merging into main.
+
+Credentials, kubeconfig files, Terraform inputs, state, and saved plans must remain outside Git. The checked-in Terraform example contains placeholders only.
 
 ## Security and cost controls
 
-Local controls include non-root containers, resource limits, health probes, strict container scanning, and tested application network isolation. A local Argo CD RBAC overlay restricts workload management to the demo-app namespace; see [security validation and limits](docs/local-security.md). Azure identity and networking controls remain unverified until deployment.
+Local validation covers non-root containers, dropped capabilities, read-only root filesystems, resource limits, probes, network policies, and reduced Argo CD workload permissions. Azure settings include Entra authentication, disabled local cluster accounts and Run Command, an operator IP allowlist, and registry-scoped AcrPull. Azure runtime behavior remains unverified.
 
-Any Azure deployment is a separately approved, temporary integration session, followed by verified deletion before ending the session. The target total Azure expenditure is approximately EUR 20. Azure budgets provide alerts, not a spending cap.
+AKS Free tier removes the cluster-management fee; compute, disks, registry, and networking can still incur charges. Any future Azure test needs a reviewed plan, a defined cleanup window, and verified deletion. The approximately EUR 20 expenditure target is not a spending cap. The cleanup deadline tag does not delete resources automatically. This project has not created Azure resources.
 
-Credentials, kubeconfig files, Terraform state, and plan files must not be committed.
+## Optional extensions
 
-## Development workflow
-
-Changes follow a branch and pull request workflow with local validation, CI checks, and review before merging into main. The initial repository baseline is reviewed before its first commit.
-
-## Planned milestones
-
-1. Repository baseline and local prerequisites.
-2. Application deployment and Kubernetes fundamentals.
-3. Helm chart and release validation.
-4. Argo CD reconciliation and GitOps recovery.
-5. Security controls and CI validation.
-6. Terraform infrastructure and Azure integration checks.
-7. Operational runbooks, deployment evidence, and cost review.
+Prometheus/Grafana metrics, HTTP availability and latency probes, and a tested alert would extend observability. Current health endpoints and Kubernetes probes provide health checking; they are not a complete monitoring stack. Azure runtime validation and automated image publishing are also possible extensions.
