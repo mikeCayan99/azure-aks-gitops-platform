@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: demo-app
+  namespace: argocd
+spec:
+  description: Local demo application delivery from the platform repository.
+  sourceRepos:
+    - https://github.com/mikeCayan99/azure-aks-gitops-platform.git
+  destinations:
+    - namespace: demo-app
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
