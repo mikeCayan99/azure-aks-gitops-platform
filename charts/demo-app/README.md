@@ -13,7 +13,7 @@ This chart renders a Deployment, a ClusterIP Service, and a dedicated ServiceAcc
 | `appVersion` | Value exposed through `APP_VERSION` | `0.1.0` |
 | `resources` | CPU and memory requests and limits | Initial values from the local manifests |
 
-`environments/local/values.yaml` overrides the image pull policy to `Never` for images loaded directly into kind. A future AKS configuration must supply a registry image; no AKS configuration is included yet.
+`environments/local/values.yaml` selects the tested image tag `git-e1f3391` and overrides the image pull policy to `Never` for images loaded directly into kind. See [the local image update procedure](../../gitops/local/README.md#update-the-local-application-image). A future AKS configuration must supply a registry image; no AKS configuration is included yet.
 
 `Chart.yaml` version identifies the chart package. Its `appVersion` field documents the application version; it does not select the image or set `APP_VERSION`. Those settings are explicit values above.
 

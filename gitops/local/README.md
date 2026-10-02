@@ -52,6 +52,30 @@ This removes the application's Helm-managed resources but preserves its namespac
 
 For recovery before a successful Argo CD sync, ensure no sync operation is running and no Argo-managed resources remain before reinstalling the Helm release. Never run both managers against the same resources.
 
+## Update the local application image
+
+The local values select `aks-gitops-demo:git-e1f3391`, built from Git revision `e1f3391` using the Alpine runtime. The application version remains `0.1.0`; an image build tag and the HTTP application version identify different things.
+
+Build from the recorded source revision in a clean checkout and load the image before syncing:
+
+```powershell
+git rev-parse --short HEAD
+docker build --pull -t aks-gitops-demo:git-e1f3391 .
+kind load docker-image aks-gitops-demo:git-e1f3391 --name aks-gitops
+```
+
+The source checkout for these build commands must be revision `e1f3391`. Do not reuse this tag for a later build from different source; assign a new tag and update local values for subsequent changes. Package repositories and transitive Python dependencies are not fully locked, so this source tag is not an immutable image digest.
+
+After the local-values change is merged into `main`, refresh the Argo CD Application and review the Deployment image change. Select a manual Sync without prune or force. The new image reference triggers a rolling update. Then check:
+
+```powershell
+kubectl --context kind-aks-gitops -n demo-app rollout status deployment/demo-app --timeout=60s
+kubectl --context kind-aks-gitops -n demo-app get pods
+kubectl --context kind-aks-gitops -n argocd get application demo-app
+```
+
+The Alpine image was validated in a temporary pod in the existing kind cluster with the Deployment's security settings, resources, and probes. It became ready without restarts; all three endpoints returned the expected HTTP 200 JSON. The test pod was removed. This evidence precedes the permanent Argo CD rollout and does not establish that the deployment already uses the new image.
+
 ## Inspect
 
 ```powershell
