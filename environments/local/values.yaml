@@ -1,3 +1,6 @@
 image:
   tag: "git-e1f3391"
   pullPolicy: Never
+
+networkPolicy:
+  enabled: true

@@ -1,6 +1,6 @@
 # Demo application Helm chart
 
-This chart renders a Deployment, a ClusterIP Service, and a dedicated ServiceAccount. The namespace and its Pod Security labels are managed separately. No Helm release is installed by the validation commands below.
+This chart renders a Deployment, a ClusterIP Service, a dedicated ServiceAccount, and an optional NetworkPolicy. The namespace and its Pod Security labels are managed separately. No Helm release is installed by the validation commands below.
 
 ## Configuration
 
@@ -67,3 +67,7 @@ kubectl --context kind-aks-gitops -n demo-app port-forward --address 127.0.0.1 s
 ```
 
 A successful initial installation reports `deployed` and revision `1`. Stop port-forward with Ctrl+C; the release continues running.
+
+## Network isolation
+
+The optional NetworkPolicy is disabled by default and enabled in local values. It denies application egress and permits TCP 8000 only from same-namespace pods labelled `access: demo-app`. A policy-capable network is required; see [local enforcement tests and limitations](../../docs/local-security.md). Other environments must enable and test the policy explicitly.

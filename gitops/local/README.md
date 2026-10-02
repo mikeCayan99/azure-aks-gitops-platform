@@ -11,6 +11,9 @@ kubectl --context kind-aks-gitops apply -f gitops/local/namespace.yaml
 kubectl --context kind-aks-gitops apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.3/manifests/install.yaml
 kubectl --context kind-aks-gitops -n argocd wait --for=condition=Available deployment --all --timeout=120s
 kubectl --context kind-aks-gitops -n argocd rollout status statefulset/argocd-application-controller --timeout=120s
+kubectl --context kind-aks-gitops apply -f environments/local/namespace.yaml
+kubectl --context kind-aks-gitops apply -f gitops/local/rbac.yaml
+kubectl --context kind-aks-gitops -n argocd patch configmap argocd-cm --type merge --patch-file gitops/local/rbac-config.patch.yaml
 kubectl --context kind-aks-gitops apply -f gitops/local/project.yaml -f gitops/local/application.yaml
 ```
 
@@ -18,7 +21,7 @@ The bootstrap files are applied explicitly with kubectl; Argo CD does not manage
 
 The Application reads `charts/demo-app` from the public repository's `main` branch and uses `environments/local/values.yaml`. No Git credentials are required. Local uncommitted chart changes are not read by Argo CD. Keep the Application name and Helm rendering release name `demo-app` aligned with the chart's instance labels.
 
-The AppProject permits only this repository, this cluster's `demo-app` namespace, and Deployment, Service, and ServiceAccount resources. The namespace is provisioned separately; the project does not allow cluster-scoped resources.
+The AppProject permits only this repository, this cluster's `demo-app` namespace, and Deployment, Service, ServiceAccount, and NetworkPolicy resources. The namespace is provisioned separately; the project does not allow cluster-scoped resources.
 
 ## Access the UI
 
@@ -88,9 +91,9 @@ kubectl --context kind-aks-gitops -n demo-app get pods,services
 
 ## Limits
 
-The official installation grants broad Kubernetes cluster permissions to Argo CD. AppProject restrictions narrow application destinations and resource types but are not a replacement for least-privilege Kubernetes RBAC. The local default admin account is used initially; SSO and production hardening are not implemented.
+The official installation grants broad Kubernetes cluster permissions to Argo CD. The [local security overlay](../../docs/local-security.md) narrows controller writes to the demo-app namespace and server access to read-only application inspection. Apply the overlay after the upstream installation. AppProject restrictions are additional policy and do not replace Kubernetes RBAC. The local default admin account is used initially; SSO and production hardening are not implemented.
 
-Argo CD 3.5's documented test matrix includes Kubernetes 1.33 through 1.36. This existing kind cluster uses Kubernetes 1.37, so successful local checks do not establish officially tested compatibility. The upstream installation includes NetworkPolicies, but enforcement has not been verified on the default kind network.
+Argo CD 3.5's documented test matrix includes Kubernetes 1.33 through 1.36. This existing kind cluster uses Kubernetes 1.37, so successful local checks do not establish officially tested compatibility. The application NetworkPolicy has been tested on the existing kind network; see [the results and boundaries](../../docs/local-security.md). Upstream Argo CD policies were not individually validated.
 
 Automatic synchronization, drift/self-heal testing, and Azure deployment remain unverified. A subsequent manual version update and Git-revert rollback are documented in [the validation evidence](../../docs/gitops-validation.md).
 

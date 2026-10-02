@@ -18,7 +18,7 @@ Local validation uses kind with Docker Desktop. Azure integration uses temporary
 
 ## Security and cost controls
 
-Planned controls include narrowly scoped Azure identities, Kubernetes RBAC, non-root containers, resource requests and limits, health probes, enforced network policies, and container scanning.
+Local controls include non-root containers, resource limits, health probes, strict container scanning, and tested application network isolation. A local Argo CD RBAC overlay restricts workload management to the demo-app namespace; see [security validation and limits](docs/local-security.md). Azure identity and networking controls remain unverified until deployment.
 
 Azure resources will be provisioned for scheduled integration checks and removed afterward. The target total Azure expenditure is approximately EUR 20. Azure budgets provide alerts, not a spending cap.
 
